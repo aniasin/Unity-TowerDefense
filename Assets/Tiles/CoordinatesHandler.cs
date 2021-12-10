@@ -8,28 +8,30 @@ using TMPro;
 public class CoordinatesHandler : MonoBehaviour
 {
     [SerializeField] Color defaultColor = Color.white;
-    [SerializeField] Color blockedColor = Color.grey;
-    Vector3 lastPos;
+    [SerializeField] Color blockedColor = Color.red;
+    [SerializeField] Color exploredColor = Color.grey;
+    [SerializeField] Color pathColor = Color.green;
     Vector2Int coordinates;
+    GridManager gridManager;
+
     TextMeshPro text;
-    Waypoint waypoint;
+
 
     void Awake()
     {
+        gridManager = FindObjectOfType<GridManager>();
         text = GetComponent<TextMeshPro>();
-        text.enabled = false;
-        waypoint = GetComponentInParent<Waypoint>();
+        text.enabled = true;
         DisplayCoordinates();        
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (!Application.isPlaying && transform.parent.position != lastPos)
+        if (!Application.isPlaying)
         {
             DisplayCoordinates();
             UpdateTileName();
-            lastPos = transform.parent.position;
         }
         SetTextColor();
         ToggleTexts();
@@ -37,8 +39,10 @@ public class CoordinatesHandler : MonoBehaviour
 
     void DisplayCoordinates()
     {
-        coordinates.x = Mathf.RoundToInt(transform.parent.position.x / UnityEditor.EditorSnapSettings.move.x);
-        coordinates.y = Mathf.RoundToInt(transform.parent.position.z / UnityEditor.EditorSnapSettings.move.z);
+        if (!gridManager) return;
+
+        coordinates.x = Mathf.RoundToInt(transform.parent.position.x / gridManager.UnityGridSize);
+        coordinates.y = Mathf.RoundToInt(transform.parent.position.z / gridManager.UnityGridSize);
         text.text = coordinates.x + ", " + coordinates.y;
     }
 
@@ -52,9 +56,22 @@ public class CoordinatesHandler : MonoBehaviour
 
     void SetTextColor()
     {
-        if (waypoint.IsNotPlaceable)
+        if (!gridManager) return;
+
+        Node node = gridManager.GetNode(coordinates);
+        if (node == null) return;
+
+        if (!node.isWalkable)
         {
             text.color = blockedColor;
+        }
+        else if (node.isPath)
+        {
+            text.color = pathColor;
+        }
+        else if (node.isExplored)
+        {
+            text.color = exploredColor;
         }
         else
         {

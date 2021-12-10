@@ -8,7 +8,7 @@ public class Tower : MonoBehaviour
 
     private void Awake()
     {
-        
+
     }
     public bool CreateTower(Tower tower, Vector3 posittion)
     {
