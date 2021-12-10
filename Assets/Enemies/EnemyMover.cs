@@ -22,28 +22,38 @@ public class EnemyMover : MonoBehaviour
 
     void OnEnable()
     {
-        FindPath();
         ReturnToStart();
-        StartCoroutine(MoveAlongPath());
+        RecalculatePath(true);
     }
 
-    void FindPath()
+    void RecalculatePath(bool resetPath)
     {
+        StopAllCoroutines();
         path.Clear();
-        path = pathFinder.GetNewPath();
+        Vector2Int coordinates = new Vector2Int();
+        if (!resetPath)
+        {
+            coordinates = gridManager.GetCoordinatesFromPosition(transform.position);
+            path = pathFinder.GetNewPath(coordinates);
+        }
+        else
+        {
+            path = pathFinder.GetNewPath();
+        }
+        StartCoroutine(FollowPath());
     }
 
     void ReturnToStart()
     {
-        transform.position = gridManager.GetPositionFromCoordinates(path[0].coordinates);
+        transform.position = gridManager.GetPositionFromCoordinates(pathFinder.StartCoords);
     }
 
-    IEnumerator MoveAlongPath()
+    IEnumerator FollowPath()
     {
-        foreach (Node node in path)
+        for (int i = 1; i < path.Count; i++)
         {
             Vector3 startPos = transform.position;
-            Vector3 EndPos = gridManager.GetPositionFromCoordinates(node.coordinates);
+            Vector3 EndPos = gridManager.GetPositionFromCoordinates(path[i].coordinates);
             float travelpercent = 0f;
 
             transform.LookAt(EndPos);

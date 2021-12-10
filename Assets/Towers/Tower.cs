@@ -5,10 +5,11 @@ using UnityEngine;
 public class Tower : MonoBehaviour
 {
     [SerializeField] int cost = 75;
+    [SerializeField] [Range(0.1f, 10f)] float buildTime = 1f;
 
-    private void Awake()
+    void Start()
     {
-
+        StartCoroutine(Build());
     }
     public bool CreateTower(Tower tower, Vector3 posittion)
     {
@@ -22,5 +23,14 @@ public class Tower : MonoBehaviour
             return true;
         }
         return false;
+    }
+
+    IEnumerator Build()
+    {
+        for (int i = 0; i < 3; i++)
+        {
+            print("TOWER: BUILD..." + i);
+            yield return new WaitForSeconds(buildTime);
+        }        
     }
 }
